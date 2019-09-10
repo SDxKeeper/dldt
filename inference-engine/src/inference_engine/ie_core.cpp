@@ -409,11 +409,13 @@ ExecutableNetwork Core::LoadNetwork(CNNNetwork network, const std::string & devi
                                     const std::map<std::string, std::string> & config) {
     std::map<std::string, std::string> config_ = config;
     std::string deviceName_ = deviceName;
-
+std::cout<<"Core::LoadNetwork - 1" << std::endl << std::flush;
     if (deviceName_.find("HETERO:") == 0) {
+std::cout<<"Core::LoadNetwork - 1-1" << std::endl << std::flush;
         deviceName_ = "HETERO";
         config_["TARGET_FALLBACK"] = deviceName.substr(7);
     } else {
+std::cout<<"Core::LoadNetwork - 1-2" << std::endl << std::flush;        
         DeviceIDParser parser(deviceName_);
         deviceName_ = parser.getDeviceName();
         std::string deviceIDLocal = parser.getDeviceID();
@@ -422,7 +424,7 @@ ExecutableNetwork Core::LoadNetwork(CNNNetwork network, const std::string & devi
             config_[KEY_DEVICE_ID] = deviceIDLocal;
         }
     }
-
+std::cout<<"Core::LoadNetwork - 2" << std::endl << std::flush;
     return _impl->GetCPPPluginByName(deviceName_).LoadNetwork(network, config_);
 }
 

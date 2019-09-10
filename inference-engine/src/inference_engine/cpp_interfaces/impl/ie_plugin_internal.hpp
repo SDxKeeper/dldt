@@ -31,9 +31,11 @@ public:
      * Given optional implementation of deprecated load to avoid need for it to be implemented by plugin
      */
     void LoadNetwork(ICNNNetwork &network) override {
+std::cout<<"InferencePluginInternal::LoadNetwork(ICNNNetwork) - 1" << std::endl << std::flush;
         _isDeprecatedLoad = true;
         network.getInputsInfo(_networkInputs);
         network.getOutputsInfo(_networkOutputs);
+std::cout<<"InferencePluginInternal::LoadNetwork - 2" << std::endl << std::flush;        
         if (_networkInputs.empty() || _networkOutputs.empty()) {
             THROW_IE_EXCEPTION << "The network doesn't have inputs/outputs.";
         }
@@ -42,10 +44,12 @@ public:
 
         _firstInput = _networkInputs.begin()->first;
         _firstOutput = _networkOutputs.begin()->first;
+std::cout<<"InferencePluginInternal::LoadNetwork - 3" << std::endl << std::flush;        
         LoadNetwork(_loadedNetwork, network, {});
-
+std::cout<<"InferencePluginInternal::LoadNetwork - 4" << std::endl << std::flush;
         ResponseDesc resp;
         StatusCode sts = _loadedNetwork->CreateInferRequest(_createdInferRequest, &resp);
+std::cout<<"InferencePluginInternal::LoadNetwork - 5 - end" << std::endl << std::flush;        
         if (sts != OK) THROW_IE_EXCEPTION << resp.msg;
     }
     /**
@@ -78,13 +82,14 @@ public:
     void LoadNetwork(IExecutableNetwork::Ptr &executableNetwork,
                      ICNNNetwork &network,
                      const std::map<std::string, std::string> &config) override {
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 1" << std::endl << std::flush;                         
         InputsDataMap networkInputs;
         OutputsDataMap networkOutputs;
         network.getInputsInfo(networkInputs);
         network.getOutputsInfo(networkOutputs);
         _networkInputs.clear();
         _networkOutputs.clear();
-
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 2" << std::endl << std::flush;
         for (const auto& it : networkInputs) {
             InputInfo::Ptr newPtr;
             if (it.second) {
@@ -106,7 +111,7 @@ public:
             }
             _networkInputs[it.first] = newPtr;
         }
-
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 3" << std::endl << std::flush;
         for (const auto& it : networkOutputs) {
             DataPtr newData;
             if (it.second) {
@@ -115,18 +120,21 @@ public:
             }
             _networkOutputs[it.first] = newData;
         }
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 4" << std::endl << std::flush;        
         auto impl = LoadExeNetworkImpl(GetCore(), RemoveConstLayers(network), config);
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 5" << std::endl << std::flush;        
         impl->setNetworkInputs(_networkInputs);
         impl->setNetworkOutputs(_networkOutputs);
         // skip setting shared ptr to avoid curricular dependency: ExecutableNetworkBase -> IExecutableNetworkInternal -> InferencePluginInternal
         if (!_isDeprecatedLoad) {
             impl->SetPointerToPluginInternal(shared_from_this());
         }
-
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 6" << std::endl << std::flush;
         executableNetwork.reset(new ExecutableNetworkBase<ExecutableNetworkInternal>(impl), [](details::IRelease *p) {
             p->Release();
         });
         _isDeprecatedLoad = false;
+std::cout<<"InferencePluginInternal::LoadNetwork(IExecutableNetwork) - 7 - end" << std::endl << std::flush;        
     }
 
     /**

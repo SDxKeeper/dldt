@@ -423,6 +423,7 @@ std::cout<<"Core::LoadNetwork - 1-2" << std::endl << std::flush;
         if (!deviceIDLocal.empty()) {
             config_[KEY_DEVICE_ID] = deviceIDLocal;
         }
+std::cout<<"Core::LoadNetwork - 1-3" << std::endl << std::flush;        
     }
 std::cout<<"Core::LoadNetwork - 2" << std::endl << std::flush;
     return _impl->GetCPPPluginByName(deviceName_).LoadNetwork(network, config_);
